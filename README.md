@@ -1,7 +1,8 @@
 Aplicacion multiplataforma con componentes personalizados
 ==========
 
-esta aplicacion fue desarrollada utilizando Javascript, por medio de Angular la aplicacion es serverless, lo cual nos permite calculos inmediatos sin peticiones a red, los componentes son personalizados por medio de archivos CSS
+Esta aplicacion fue desarrollada utilizando Javascript, por medio de Angular la aplicacion es serverless, lo cual nos permite calculos inmediatos sin peticiones a red, los componentes son personalizados por medio de archivos CSS.
+
 Soporta las siguientes plataformas:
 
 + Windows
