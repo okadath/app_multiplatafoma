@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html ng-app="vida">
+<head><meta charset="utf-8">
+	<title>Meh :v</title>
+	<script src="js/angular.min.js"></script>
+
+	<link rel="stylesheet" href="css/material-design-iconic-font-master/dist/css/material-design-iconic-font.min.css">
+
+	<link rel="stylesheet" href="css/onsenui.css"/>
+	<link rel="stylesheet" href="css/onsen-css-components.css"/>
+
+	<script src="js/onsenui.min.js"></script>
+	<script src="js/angular-onsenui.min.js"></script>
+	<script type="text/javascript">ons.platform.select('android');</script>
+	<script>
+		ons.bootstrap();
+	</script>
+</head>
+<body onload="inicializarCanvas()">
+<style type="text/css">
+/* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css"> */
+.contenedor-tabla{
+	display: table;
+	margin: 10px;
+	padding: 0px 0px 8px 0px;
+}
+.contenedor-fila{
+	display: table-row;
+}
+.contenedor-columna{
+	display: table-cell;
+	padding:6px;
+	/*background-color: #ABFCF4;*/
+}
+.contenedor-columna2{
+	display: table-cell;
+	padding:4px;
+	background-color: #D5ECFC;
+}
+.contenedor{
+	box-sizing:border-box;
+	float:left;
+	width:100%;
+	padding:8px;
+}
+#div_canvas{ width:100%; height:100%; margin:0 auto;}
+#canvas{border:1px solid #d9d9d9; width: 100%; height: 100%;}
+
+/*label.checkbox-label input[type=checkbox]{
+
+vertical-align: text-top;
+padding:8px;
+}*/
+
+</style>
+<ons-page ng-controller="controlador1" ng-init="">
+	<ons-toolbar>
+		<div class="center">Life Game</div>
+</ons-toolbar>
+<div class="contenedor-tabla">
+<div class="contenedor-fila">
+	<div class="contenedor-columna" >
+		<h4>Canvas</h4>
+		<canvas id="canvas" style="border: 1px solid;
+		box-shadow: 0 0 20px #000;
+		background: #fff;">
+		Este texto se muestra para los navegadores no compatibles con canvas.
+		<br>
+		Por favor, utiliza Firefox, Chrome, Safari u Opera.
+	</canvas>
+</div>
+<div class="contenedor-columna">
+	<h4>Controles</h4>
+
+	<div ng-controller="controlador1" >
+
+		<div class="contenedor-columna">
+			<div class="contenedor-fila">
+			<div class="contenedor-columna2">
+
+
+
+			</div>
+			</div>
+		</div>
+
+		Dim x:
+		<ons-range style="width: 50%;" min="5" max="200" step="5" ng-model="dim_x" ng-change="onchange()"></ons-range>
+		{{dim_x}}<br>
+		Dim y: <ons-range style="width: 50%;" min="5" max="200" step="5" ng-model="dim_y" ng-change="onchange()"></ons-range>
+		{{dim_y}}<br>
+		Speed:
+		<ons-range style="width: 50%;" min="5" max="400" step="5" ng-model="vel" ng-change="changevel()"></ons-range>
+		{{vel}}
+
+
+		<br>Playing:<span class="notification notification--material">{{lastt}}</span>
+		<br>Iter:<span class="notification notification--material">{{iteraciones}}</span>
+
+
+
+		<br><br>
+		<button type="button" class="button" data-ng-click="play()" size="15px" style="line-height: 10px; font-size: 8pt"><i class="zmdi zmdi-play zmdi-hc-2x"></i></button>
+		<button type="button" class="button" data-ng-click="pause()" style="line-height: 10px; font-size: 8pt"><i class="zmdi zmdi-pause zmdi-hc-2x"></i></button>
+		<button type="button" class="button" data-ng-click="stopAnim()" style="line-height: 10px; font-size: 8pt"><i class="zmdi zmdi-replay zmdi-hc-2x"></i></button>
+		<button class="button" ng-click="randomize()" size="15px" style="line-height: 10px; font-size: 8pt"><i class="zmdi zmdi-shuffle zmdi-hc-2x"></i></button>
+		<br>
+	</div>
+
+
+</div>
+</div>
+</div>
+</ons-page>
+
+<script>
+/*<div style="line-height: 10px; font-size: 8pt" ng-repeat="columna in arr">
+{{columna}}</div><br>
+<div style="line-height: 10px; font-size: 8pt" ng-repeat="columna2 in temp2">
+{{columna2}}</div>*/
+
+angular.module('vida', ['onsen'])
+
+.controller('controlador1', ['$scope', '$interval',
+function($scope, $interval) {
+
+	var arr=new Array()
+	$scope.arr=arr
+	$scope.temp2=new Array()
+	$scope.dim_y=5
+	$scope.dim_x=5
+	$scope.vel=500
+	$scope.playing=0
+	$scope.lastt=$scope.playing
+	$scope.confirmed=false
+	$scope.casillas_on=0
+	$scope.iteraciones=0
+
+
+$scope.init=function(array_ini){
+	for (var i =0; i< $scope.dim_y; i++) {
+  	temp=[]//limpia el array temporal
+  	for (var j=0; j < $scope.dim_x; j++) {
+  		temp[j]=0
+  	}
+  	array_ini[i]=temp
+  }
+  return array_ini
+  	//$scope.temp2=$scope.arr
+
+  }
+  $scope.arr=$scope.init($scope.arr)
+  $scope.temp2=$scope.init($scope.temp2)
+
+  $scope.randomize=function(){
+  	for (var i = 0; i< $scope.dim_y; i++) {
+      temp=[]//limpia el array temporal
+      for (var j=0; j < $scope.dim_x; j++) {
+      	temp[j]=getRandom()
+      }
+      $scope.arr[i]=temp
+  }
+  dibujarEnElCanvas(canvas.getContext("2d"),$scope.arr,$scope.vel)
+}
+$scope.change_size = function(mi_arr){//funcion cambio de tama;o dinamicamente
+	var temp=new Array()
+	    //removemos del eje y
+	    if (mi_arr.length>$scope.dim_y){
+	    	for (var i = mi_arr.length; i >$scope.dim_y; i--) {
+	    		mi_arr.pop()
+	    	}
+	    }
+	  //agregamos n filas en cero
+	  else if(mi_arr.length<$scope.dim_y) {
+	  	for (var i = mi_arr.length; i< $scope.dim_y; i++) {
+	      temp=[]//limpia el array temporal
+	      for (var j=0; j < $scope.dim_x; j++) {
+	      	temp[j]=0
+	      }
+	      mi_arr.push(temp)
+	  }
+	  }//agregamos n ceros al final de cada fila
+	  else if(mi_arr[0].length<$scope.dim_x) {
+	  	for (var i = 0; i< $scope.dim_y; i++) 	{
+	      //temp=[]//limpia el array temporal
+	      for (var j=mi_arr[i].length; j < $scope.dim_x; j++) {
+	      	mi_arr[i].push(0)
+	      }        
+	  }      
+	}
+	  //removemos del eje x n elementos
+	  else if(mi_arr[0].length>$scope.dim_x){
+	  	for (var i=0; i < $scope.dim_y; i++) 	{
+	  		for (var j=mi_arr[i].length; j >$scope.dim_x; j--) {
+		  	//for (var i = mi_arr.length; i >$scope.dim_y; i--) 
+		      //temp=[]//limpia el array temporal
+		      mi_arr[i].pop()
+		  }        
+		}      
+
+
+	}
+	  $scope.long=mi_arr.length//test
+	  $scope.anchura=mi_arr[0].length//test
+
+	  //$scope.lastt=$scope.playing//
+	  //mi_arr[$scope.dim_y-1][$scope.dim_x-1]//mas test
+	}
+
+	//$scope.$watch($scope.change_size)//listener permanente...peligroso :'v
+//$scope.$watch(draw())
+	var stop
+	$scope.onchange=function(){//cuando cambia el slider dim_x odim_y agrega ceros a los arrays
+		$scope.change_size($scope.arr)
+		$scope.change_size($scope.temp2)
+		dibujarEnElCanvas(canvas.getContext("2d"),$scope.arr,$scope.vel)
+	}
+
+	$scope.changevel=function(){
+		//al mover el slider velocidad lo pausa instantaneamente y reproduce, si el cambio es rapido la funcion mantiene en pausa los milisegundos de actualizacion del slider velocidad por cuestiones del tiempo de $interval
+		if($scope.playing==1){//funcion de pausa pero sin poner el playing a 0 para mantener la logica de los controles
+			if (angular.isDefined(stop)) {
+				$interval.cancel(stop)
+				stop = undefined
+	  		//$scope.playing=0	
+	  	}
+	  	$scope.play()
+	  }
+	  else if ($scope.playing==0) {
+	  	$scope.pause()
+	  	$scope.playing=0
+	  }
+	}
+
+$scope.copiar=function (origen, destino) {//copia array elemento por elemento
+
+	for (var y = 0; y < $scope.dim_y; y++) {
+		for (var x = 0; x < $scope.dim_x; x++) {
+			destino[y][x] = origen[y][x];
+		}
+	}
+	return destino;
+}
+
+$scope.eval=function(tablero,tablero_aux){
+	//motor de evaluacion
+	for(var y=0;y<$scope.dim_y;y++){
+		for(var x=0;x<$scope.dim_x;x++){
+			casillas_on=0;
+
+			if ( (y-1>=0) && (x-1>=0) && (tablero[y-1][x-1]==1) ) casillas_on++;
+			if ( (x-1>=0) && (tablero[y][x-1]==1) ) casillas_on++;
+			if ( (y+1<$scope.dim_y) && (x-1>=0) && (tablero[y+1][x-1]==1) ) casillas_on++;
+			if ( (y-1>=0) && (tablero[y-1][x]==1) ) casillas_on++;
+			if ( (y+1<$scope.dim_y) && (tablero[y+1][x]==1) ) casillas_on++;
+			if ( (y-1>=0) && (x+1<$scope.dim_x) && (tablero[y-1][x+1]==1) ) casillas_on++;
+			if ( (x+1<$scope.dim_x) && (tablero[y][x+1]==1) ) casillas_on++;
+			if ( (y+1<$scope.dim_y) && (x+1<$scope.dim_x) && (tablero[y+1][x+1]==1) ) casillas_on++;
+
+	if (casillas_on<2) {		// Si alrededor hay menos de dos celdas vivas,
+		tablero_aux[y][x]=0;	// muere por escasa población.
+	}
+	else if (casillas_on>3) {		// Si alrededor hay más de tres celdas vivas,
+		tablero_aux[y][x]=0;	// muere por superporblación.
+	}
+
+	else if (casillas_on==3) {		// Si alrededor hay tres celdas vivas,
+		tablero_aux[y][x]=1;	// vive (sigue viviendo o se crea vida).
+	}
+
+}
+}
+$scope.copiar(tablero_aux,tablero)
+
+}
+
+$scope.play = function() {
+  // Don't start a new play if we are already playing
+  if ( angular.isDefined(stop) ) return;
+  stop = $interval(function() {
+  	$scope.eval($scope.arr, $scope.temp2)
+  	dibujarEnElCanvas(canvas.getContext("2d"),$scope.arr,$scope.vel)
+  	//inicializarCanvas()//draw()
+  	//$scope.randomize()//aqui va la funcion a evaluar en el tiempo
+  	$scope.playing=1
+  	$scope.iteraciones++
+  	$scope.lastt=$scope.playing
+  },$scope.vel)
+}
+
+$scope.pause = function() {
+	if (angular.isDefined(stop)) {
+		$interval.cancel(stop)
+		stop = undefined
+		$scope.playing=0	
+		//borra_canvas(canvas.getContext("2d"))
+		$scope.lastt=$scope.playing
+		dibujarEnElCanvas(canvas.getContext("2d"),$scope.arr,$scope.vel)
+	}
+}
+
+$scope.stopAnim = function() {//resetea todo
+	$scope.temp2=[]
+	$scope.init($scope.arr)
+	$scope.init($scope.temp2)
+	$scope.iteraciones=0
+	dibujarEnElCanvas(canvas.getContext("2d"),$scope.arr,$scope.vel)
+};
+
+$scope.$on('$destroy', function() {
+      // Make sure that the interval is destroyed too
+      $scope.pause();
+  });
+
+}])
+
+function getRandom() {
+	return Math.round(Math.random());
+}
+
+function draw(){//dibujo del canvas para no olvidar funciones :v
+
+	var canvas = document.getElementById('micanvas'); 
+	var contexto = canvas.getContext('2d'); 
+
+	contexto.fillStyle = '#D00000'; 
+	contexto.fillRect(0,0,30,20); 
+	contexto.fillRect(0,0,1700,1700); 
+	contexto.fillStyle='#000000' 
+	contexto.fillStyle = 'rgb(16,214,85,0.8)'; 
+	contexto.fillRect(20,0,20,20); 
+	//cambio el color a amarillo con un poco de transparencia 
+	contexto.fillStyle = '#1500D0'; 
+	//dibuja linea 
+	contexto.moveTo(0,20); 
+	contexto.lineTo(180,20); 
+	contexto.strokeStyle = 'rgb(0,0,0,1)'; 
+	contexto.moveTo(10,15); 
+	contexto.lineTo(180,15); 
+	contexto.stroke(); 
+	//pinto un rectángulo amarillo semitransparente 
+	contexto.fillRect(35,35,50,50); 
+}
+
+
+var canvas = document.querySelector("#canvas");
+var X,Y,W,H,r;              
+canvas.height = 500; 
+canvas.width = 900;
+function inicializarCanvas(){ 
+	if (canvas && canvas.getContext) {
+		var ctx = canvas.getContext("2d");
+		if (ctx) {
+			var s = getComputedStyle(canvas);
+			var w = s.width;
+			var h = s.height;
+		 //la segunda igualacion es la retroalimentacion del tama;o del canvas 
+		 //en pixeles nuestro cargandole el tama;o desplegado en pantalla
+		 //como hay peque;as bvariaciones por la pantalla despliegue redondeo etc
+		 //entonces se produce un aumento hasta que deja de variar
+		 W = canvas.width = w.split("px")[0];
+		 H = canvas.height = h.split("px")[0];
+		 X = Math.floor(W/2);
+		 Y = Math.floor(H/2);
+		 r = Math.floor(W/3);
+
+		 //dibujarEnElCanvas(ctx);
+		}
+	}
+}
+
+var	 t=100; 	   
+function dibujarEnElCanvas(ctx, array,t){
+	/*var canvas = document.querySelector("#canvas");
+	var s = getComputedStyle(canvas);
+	 var w = s.width;
+	 var h = s.height;
+	 W = canvas.width
+	 H = canvas.height */
+	 //para reutilizar la informacion sin errores eliminamos la doble igualacion de arriba
+	 //eliminamos los decimales
+	 X = Math.floor(W);
+	 Y = Math.floor(H);
+	//X es el tama;o maximo del eje X
+	//Y es el tama;o maximo del eje Y
+	var coord_x = 0;
+	var coord_y = 0;
+	// Los frames seran renderizados por este intervalo
+	// aproximadamente a 24 frames por segundo (fps)
+	//setInterval(function() {
+	// Limpiamos el canvas, eliminando el contenido
+	// desde el punto (0, 0) al punto (100, 100)
+	ctx.clearRect(0, 0, X, Y);    
+	// Generamos nuevas coordenadas
+	// Que basicamente representan un desplazamiento lineal
+	//x = x >= 100 ? 0 : x + 1;
+	//y = y >= 100 ? 0 : y + 1;
+	// Y dibujamos nuevamente
+	var d_x=Math.floor(X/array[0].length);
+	var d_y=Math.floor(Y/array.length);
+
+//recorremos el arreglo para evaluar el canvas
+
+for (var y = 0; y < array.length; y++) {
+	coord_x=0;//inicia nueva fila del array y del canvas
+		for (var x = 0; x <array[0].length; x++) {
+		if(array[y][x]==1){//pinta cuadro negro
+			ctx.fillStyle = "#000000";
+			ctx.fillRect(coord_x,coord_y, d_x, d_y);
+		}
+		else{//pinta cuadro blanco "vacio"
+			ctx.fillStyle = "#FFFFFF";
+		ctx.fillRect(coord_x,coord_y, d_x, d_y);
+	}
+	coord_x=coord_x+d_x;
+	}coord_y=coord_y+d_y;
+}
+}
+
+function borra_canvas(ctx){ 	
+	ctx.clearRect(0, 0, W, H);
+}  
+</script>
+
+</body>
+</html>

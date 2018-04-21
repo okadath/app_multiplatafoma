@@ -1,0 +1,18 @@
+{//esto va para el instalador de windows
+   "name": "electron-tutorial-app",
+    "productName": "Electron tutorial app",
+    "description": "Application for electron tutorials",
+    "version": "0.1.0",//hasta aqui
+  "main": "main.js",
+  "dependencies": {
+    "pretty-bytes": "^2.0.1"
+  },
+  "devDependencies": {
+    "electron-prebuilt": "^0.35.2"
+  },
+  "scripts": {
+    "start": "electron main.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
