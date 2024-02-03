@@ -1,14 +1,15 @@
-Aplicacion multiplataforma con componentes personalizados
+Cross-Platform Application with Custom Components
 ==========
 
-Esta aplicacion fue desarrollada utilizando Javascript, por medio de Angular la aplicacion es serverless, lo cual nos permite calculos inmediatos sin peticiones a red, los componentes son personalizados por medio de archivos CSS.
+This application was developed using Javascript, and through Angular, the application is serverless, allowing for immediate calculations without network requests. Components are customized using CSS files.
 
-Soporta las siguientes plataformas:
+Supports the following platforms:
 
 + Windows
-+ Linux(Ubuntu y Debian)
++ Linux (Ubuntu and Debian)
 + Web
-+ Android(por medio de Cordova)
++ Android (via Cordova)
+
 
 ![look&feel Windows 8.1](https://github.com/okadath/app_multiplatafoma/blob/master/windows.png)
 
